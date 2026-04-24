@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: API de Integración - SaludVital
+  version: 1.0.0
+  description: API REST para recepción de pre-registros válidos hacia Facturación.
+servers:
+  - url: https://api.saludvital.com
+paths:
+  /api/v1/pre-registrations:
+    post:
+      summary: Registra un nuevo paciente pre-registrado en Facturación.
+      operationId: createPreRegistration
+      requestBody:
+        description: Carga útil con los datos del paciente requeridos para facturación.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreRegistrationRequest'
+      responses:
+        '201':
+          description: Pre-registro creado y validado correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Datos inválidos (Error de validación de campos o de negocio).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    PreRegistrationRequest:
+      type: object
+      required:
+        - patient_id
+        - full_name
+        - appointment_date
+        - insurance_code
+      properties:
+        patient_id:
+          type: string
+          description: Identificador único del paciente.
+          example: "P-10023"
+        full_name:
+          type: string
+          description: Nombre completo del paciente.
+          example: "Juan Perez"
+        appointment_date:
+          type: string
+          format: date
+          description: Fecha de la cita médica (formato YYYY-MM-DD).
+          example: "2026-04-22"
+        insurance_code:
+          type: string
+          description: Código del seguro médico aplicable.
+          enum:
+            - IESS
+            - PRIVADO
+            - NINGUNO
+          example: "IESS"
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Pre-registro procesado exitosamente."
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "error"
+        message:
+          type: string
+          example: "El campo insurance_code debe ser IESS, PRIVADO o NINGUNO."
